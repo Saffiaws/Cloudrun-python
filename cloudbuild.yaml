@@ -53,3 +53,4 @@ substitutions:
   _REGION: us-central1
   _SERVICE_NAME: python-sample
   _REPO_NAME: python-sample
+  _PROJECT_ID: saffi-1
