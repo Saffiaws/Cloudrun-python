@@ -1,61 +1,48 @@
 steps:
   # Step 1: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      [
-        'build',
-        '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
-        '.'
-      ]
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA', '.']
 
   # Step 2: Push Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      [
-        'push',
-        'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
-      ]
+    args: ['push', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA']
 
   # Step 3: Deploy to Cloud Run (dev)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args:
-      [
-        'run', 'deploy', '${_SERVICE_NAME}-dev',
-        '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
-        '--region', '${_REGION}',
-        '--platform', 'managed',
-        '--allow-unauthenticated',
-        '--set-env-vars', 'ENV=dev'
-      ]
+    args: [
+      'run', 'deploy', '${_SERVICE_NAME}-dev',
+      '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--set-env-vars', 'ENV=dev'
+    ]
 
   # Step 4: Deploy to Cloud Run (staging)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args:
-      [
-        'run', 'deploy', '${_SERVICE_NAME}-staging',
-        '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
-        '--region', '${_REGION}',
-        '--platform', 'managed',
-        '--allow-unauthenticated',
-        '--set-env-vars', 'ENV=staging'
-      ]
+    args: [
+      'run', 'deploy', '${_SERVICE_NAME}-staging',
+      '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--set-env-vars', 'ENV=staging'
+    ]
 
-  # Step 5: Deploy to Cloud Run (prod) - requires approval
+  # Step 5: Deploy to Cloud Run (prod) -- will only run after manual approval
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: Deploy to prod
+    id: deploy-prod
     entrypoint: gcloud
-    args:
-      [
-        'run', 'deploy', '${_SERVICE_NAME}-prod',
-        '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
-        '--region', '${_REGION}',
-        '--platform', 'managed',
-        '--allow-unauthenticated',
-        '--set-env-vars', 'ENV=prod'
-      ]
-    waitFor: ['-']
+    args: [
+      'run', 'deploy', '${_SERVICE_NAME}-prod',
+      '--image', 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--set-env-vars', 'ENV=prod'
+    ]
 
 images:
   - 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
@@ -64,6 +51,3 @@ substitutions:
   _REGION: us-central1
   _SERVICE_NAME: python-sample
   _REPO_NAME: python-sample
-
-approvals:
-  - step: 'Deploy to prod'
