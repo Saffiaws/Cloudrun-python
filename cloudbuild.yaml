@@ -46,6 +46,7 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
+logging: NONE
 
 substitutions:
   _REGION: us-central1
